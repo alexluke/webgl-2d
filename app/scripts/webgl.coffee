@@ -64,7 +64,9 @@ define ->
         draw: ->
             positionLocation = @gl.getAttribLocation @shaderProgram, 'a_position'
             resolutionLocation = @gl.getUniformLocation @shaderProgram, 'u_resolution'
+            colorLocation = @gl.getUniformLocation @shaderProgram, 'u_color'
             @gl.uniform2f resolutionLocation, @width, @height
+            @gl.uniform4f colorLocation, 0, 1, 0, 1
 
             buffer = @gl.createBuffer()
             @gl.bindBuffer @gl.ARRAY_BUFFER, buffer
