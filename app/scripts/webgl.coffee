@@ -12,6 +12,9 @@ define ->
             if not @gl
                 throw 'Cannot init WebGL'
 
+            @width = canvas.width
+            @height = canvas.height
+
             @initShaders()
 
         _compileShader: (id) ->
@@ -60,16 +63,18 @@ define ->
 
         draw: ->
             positionLocation = @gl.getAttribLocation @shaderProgram, 'a_position'
+            resolutionLocation = @gl.getUniformLocation @shaderProgram, 'u_resolution'
+            @gl.uniform2f resolutionLocation, @width, @height
 
             buffer = @gl.createBuffer()
             @gl.bindBuffer @gl.ARRAY_BUFFER, buffer
             @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array([
-                    -1.0, -1.0
-                    1.0, -1.0
-                    -1.0, 1.0
-                    -1.0, 1.0
-                    1.0, -1.0
-                    1.0, 1.0
+                    10, 20
+                    80, 20
+                    10, 30
+                    10, 30
+                    80, 20
+                    80,30
                 ]),
                 @gl.STATIC_DRAW
 
