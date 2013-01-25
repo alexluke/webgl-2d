@@ -16,6 +16,7 @@ define [
 
             @width = canvas.width
             @height = canvas.height
+            @image = document.getElementById 'image'
 
             @initShaders()
 
@@ -65,20 +66,39 @@ define [
 
         draw: ->
             positionLocation = @gl.getAttribLocation @shaderProgram, 'a_position'
+            texCoordLocation = @gl.getAttribLocation @shaderProgram, 'a_texCoord'
             resolutionLocation = @gl.getUniformLocation @shaderProgram, 'u_resolution'
-            colorLocation = @gl.getUniformLocation @shaderProgram, 'u_color'
             @gl.uniform2f resolutionLocation, @width, @height
-            @gl.uniform4f colorLocation, 0, 1, 0, 1
+
+            texCoordBuffer = @gl.createBuffer()
+            @gl.bindBuffer @gl.ARRAY_BUFFER, texCoordBuffer
+            @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array([
+                    0.0, 0.0
+                    1.0, 0.0
+                    0.0, 1.0
+                    0.0, 1.0
+                    1.0, 0.0
+                    1.0, 1.0
+                ]), @gl.STATIC_DRAW
+            @gl.enableVertexAttribArray texCoordLocation
+            @gl.vertexAttribPointer texCoordLocation, 2, @gl.FLOAT, false, 0, 0
+
+            texture = @gl.createTexture()
+            @gl.bindTexture @gl.TEXTURE_2D, texture
+
+            @gl.texParameteri @gl.TEXTURE_2D, @gl.TEXTURE_WRAP_S, @gl.CLAMP_TO_EDGE
+            @gl.texParameteri @gl.TEXTURE_2D, @gl.TEXTURE_WRAP_T, @gl.CLAMP_TO_EDGE
+            @gl.texParameteri @gl.TEXTURE_2D, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST
+            @gl.texParameteri @gl.TEXTURE_2D, @gl.TEXTURE_MAG_FILTER, @gl.NEAREST
+
+            @gl.texImage2D @gl.TEXTURE_2D, 0, @gl.RGBA, @gl.RGBA, @gl.UNSIGNED_BYTE, @image
 
             buffer = @gl.createBuffer()
             @gl.bindBuffer @gl.ARRAY_BUFFER, buffer
             @gl.enableVertexAttribArray positionLocation
             @gl.vertexAttribPointer positionLocation, 2, @gl.FLOAT, false, 0, 0
-
-            for i in [0...50]
-                @_setRectangle Random.nextInt(300), Random.nextInt(300), Random.nextInt(300), Random.nextInt(300)
-                @gl.uniform4f colorLocation, Random.next(), Random.next(), Random.next(), 1
-                @gl.drawArrays @gl.TRIANGLES, 0, 6
+            @_setRectangle 0, 0, @image.width, @image.height
+            @gl.drawArrays @gl.TRIANGLES, 0, 6
 
         _setRectangle: (x, y, width, height) ->
             x1 = x
